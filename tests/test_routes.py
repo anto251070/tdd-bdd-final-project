@@ -202,9 +202,28 @@ class TestProductRoutes(TestCase):
         response = self.client.put(f"{BASE_URL}/0", json={})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_delete_product(self):
+        """It should Delete a Product"""
+        # Creiamo un prodotto per avere qualcosa da eliminare
+        test_product = self._create_products(1)[0]
+        # Eseguiamo la DELETE
+        response = self.client.delete(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+        # Verifichiamo che sia effettivamente sparito
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_product_not_found(self):
+        """It should return 204 when deleting a product that doesn't exist"""
+        # Proviamo a eliminare un ID che non esiste (es. 0)
+        response = self.client.delete(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
     ######################################################################
     # Utility functions
     ######################################################################
+
     def get_product_count(self):
         """save the current number of products"""
         response = self.client.get(BASE_URL)
