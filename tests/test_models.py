@@ -129,10 +129,15 @@ class TestProductModel(unittest.TestCase):
 
     def test_delete_a_product(self):
         """It should Delete a Product"""
+        # 1. Create a Product object using the ProductFactory
         product = ProductFactory()
+        # 2. Save it to the database
         product.create()
+        # 3. Assert that there is only one product in the system
         self.assertEqual(len(Product.all()), 1)
+        # 4. Remove the product from the database
         product.delete()
+        # 5. Assert if the product has been successfully deleted
         self.assertEqual(len(Product.all()), 0)
 
     def test_list_all_products(self):
