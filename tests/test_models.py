@@ -174,17 +174,22 @@ class TestProductModel(unittest.TestCase):
 
     def test_find_by_availability(self):
         """It should Find Products by Availability"""
+        # 1. Create a batch of 10 Product objects and save them
         products = ProductFactory.create_batch(10)
         for product in products:
             product.create()
+        # 2. Retrieve the availability of the first product
         available = products[0].available
-        # Sostituito 'p' con 'product' nella list comprehension
-        count = len([product for product in products if product.available == available])
+        # 3. Count the occurrences of that availability in the local list
+        # Usiamo 'product' invece di 'p' per superare il 'make lint'
+        expected_count = len([product for product in products if product.available == available])
+        # 4. Retrieve products from the database with that availability
         found = Product.find_by_availability(available)
-        self.assertEqual(found.count(), count)
-        # Sostituito 'p' con 'item' o 'found_product' nel ciclo finale
-        for found_product in found:
-            self.assertEqual(found_product.available, available)
+        # 5. Assert the count matches
+        self.assertEqual(found.count(), expected_count)
+        # 6. Assert that each product's availability matches
+        for product in found:
+            self.assertEqual(product.available, available)
 
     def test_find_by_category(self):
         """It should Find Products by Category"""
