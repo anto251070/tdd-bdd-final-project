@@ -155,17 +155,22 @@ class TestProductModel(unittest.TestCase):
 
     def test_find_by_name(self):
         """It should Find a Product by Name"""
+        # 1. Create a batch of 5 Product objects and save them
         products = ProductFactory.create_batch(5)
         for product in products:
             product.create()
+        # 2. Retrieve the name of the first product
         name = products[0].name
-        # Corretto: variabile 'product' invece di 'p'
-        count = len([product for product in products if product.name == name])
+        # 3. Count the occurrences of that name in the local list
+        # Usiamo 'product' come nome variabile per il linter (pylint compliance)
+        expected_count = len([product for product in products if product.name == name])
+        # 4. Retrieve products from the database with that name
         found = Product.find_by_name(name)
-        self.assertEqual(found.count(), count)
-        # Corretto: rinominata variabile 'p' in 'product_found' (riga 157)
-        for product_found in found:
-            self.assertEqual(product_found.name, name)
+        # 5. Assert the count matches
+        self.assertEqual(found.count(), expected_count)
+        # 6. Assert that each found product's name matches the expected name
+        for product in found:
+            self.assertEqual(product.name, name)
 
     def test_find_by_availability(self):
         """It should Find Products by Availability"""
