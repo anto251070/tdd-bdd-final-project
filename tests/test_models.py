@@ -193,15 +193,21 @@ class TestProductModel(unittest.TestCase):
 
     def test_find_by_category(self):
         """It should Find Products by Category"""
+        # 1. Create a batch of 10 Product objects and save them
         products = ProductFactory.create_batch(10)
         for product in products:
             product.create()
+        # 2. Retrieve the category of the first product
         category = products[0].category
-        # Corretto: 'product' invece di 'p' nella list comprehension
-        count = len([product for product in products if product.category == category])
+        # 3. Count the occurrences of that category in the local list
+        # Usiamo 'product' invece di 'p' per conformità con PyLint
+        expected_count = len([product for product in products if product.category == category])
+        # 4. Retrieve products from the database with that category
         found = Product.find_by_category(category)
-        self.assertEqual(found.count(), count)
-        # Corretto: 'product' invece di 'p' nel ciclo finale
+        # 5. Assert the count matches the expected count
+        self.assertEqual(found.count(), expected_count)
+
+        # 6. Assert that each product's category matches the expected one
         for product in found:
             self.assertEqual(product.category, category)
 
