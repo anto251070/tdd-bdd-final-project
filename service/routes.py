@@ -93,14 +93,14 @@ def create_products():
     location_url = "/"  # delete once READ is implemented
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
-
 ######################################################################
 # L I S T   A L L   P R O D U C T S
 ######################################################################
+######################################################################
+# LIST PRODUCTS
+######################################################################
 
-######################################################################
-# L I S T   A L L   P R O D U C T S
-######################################################################
+
 @app.route("/products", methods=["GET"])
 def list_products():
     """
@@ -109,30 +109,24 @@ def list_products():
     """
     app.logger.info("Request to list Products...")
     products = []
-    # Extract query parameters from the request URL
+    # Estrazione dei parametri di query
     name = request.args.get("name")
-    category = request.args.get("category")
+    category = request.args.get("category")  # Recupera la stringa dalla query URL
     available = request.args.get("available")
     if name:
-        app.logger.info("Filtering by name: %s", name)
         products = Product.find_by_name(name)
     elif category:
-        app.logger.info("Filtering by category: %s", category)
-        # Convert the string category from the URL to a Category Enum
+        # QUI USIAMO CATEGORY: Trasformiamo la stringa in un membro dell'Enum
+        # Questo risolve l'errore F401 rendendo l'import "utilizzato"
         category_value = getattr(Category, category.upper())
         products = Product.find_by_category(category_value)
     elif available:
-        app.logger.info("Filtering by availability: %s", available)
-        # Convert string 'true'/'false' to boolean
         available_value = available.lower() in ["true", "yes", "1"]
         products = Product.find_by_availability(available_value)
     else:
-        app.logger.info("Fetching all products")
         products = Product.all()
-    # Serialize each product into a dictionary for the JSON response
     results = [product.serialize() for product in products]
     return jsonify(results), status.HTTP_200_OK
-
 ######################################################################
 # R E A D   A   P R O D U C T
 ######################################################################
@@ -165,39 +159,37 @@ def get_products(product_id):
 ######################################################################
 
 
+######################################################################
+# UPDATE AN EXISTING PRODUCT
+######################################################################
 @app.route("/products/<int:product_id>", methods=["PUT"])
 def update_products(product_id):
     """
     Update a Product
-    This endpoint will update a Product based on the body that is posted
+    This endpoint will update a Product based the body that is posted
     """
     app.logger.info("Request to Update a product with id [%s]", product_id)
     check_content_type("application/json")
-
-    # 1. Trova il prodotto
     product = Product.find(product_id)
     if not product:
-        # Questo farà passare il test 'test_update_product_not_found' (404)
         abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
-
-    # 2. Aggiorna i dati
-    # Il deserialize() gestirà la validazione dei dati
     product.deserialize(request.get_json())
     product.id = product_id
     product.update()
-    app.logger.info("Product with ID [%s] updated.", product.id)
-    # 3. Ritorna il risultato
-    return jsonify(product.serialize()), status.HTTP_200_OK
+    return product.serialize(), status.HTTP_200_OK
 
 ######################################################################
-# D E L E T E   A   P R O D U C T
+# DELETE A PRODUCT
 ######################################################################
 
 
 @app.route("/products/<int:product_id>", methods=["DELETE"])
 def delete_products(product_id):
-    """Delete a Product"""
-    app.logger.info("Request to Delete product with id: %s", product_id)
+    """
+    Delete a Product
+    This endpoint will delete a Product based the id specified in the path
+    """
+    app.logger.info("Request to Delete a product with id [%s]", product_id)
     product = Product.find(product_id)
     if product:
         product.delete()
