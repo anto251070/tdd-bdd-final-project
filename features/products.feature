@@ -61,6 +61,7 @@ Scenario: Update a Product
     And I press the "Search" button
     Then I should see the message "Success"
     And I should see "Hat" in the "Name" field
+    When I copy the "Id" field
     When I set the "Description" to "A blue fedora"
     And I press the "Update" button
     Then I should see the message "Success"
@@ -75,6 +76,7 @@ Scenario: Delete a Product
     And I press the "Search" button
     Then I should see the message "Success"
     And I should see "Shoes" in the "Name" field
+    When I copy the "Id" field
     When I press the "Delete" button
     Then I should see the message "Product has been Deleted!"
     When I press the "Clear" button
