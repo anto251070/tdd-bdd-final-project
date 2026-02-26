@@ -20,7 +20,7 @@ Product Store Service with UI
 """
 from flask import jsonify, request, abort
 from flask import url_for  # noqa: F401 pylint: disable=unused-import
-from service.models import Product
+from service.models import Product, Category
 from service.common import status  # HTTP Status Codes
 from . import app
 
@@ -98,20 +98,46 @@ def create_products():
 # L I S T   A L L   P R O D U C T S
 ######################################################################
 
-#
-# PLACE YOUR CODE TO LIST ALL PRODUCTS HERE
-#
+######################################################################
+# L I S T   A L L   P R O D U C T S
+######################################################################
+@app.route("/products", methods=["GET"])
+def list_products():
+    """
+    List all Products
+    This endpoint will return a list of Products, optionally filtered by criteria
+    """
+    app.logger.info("Request to list Products...")
+    products = []
+    # Extract query parameters from the request URL
+    name = request.args.get("name")
+    category = request.args.get("category")
+    available = request.args.get("available")
+    if name:
+        app.logger.info("Filtering by name: %s", name)
+        products = Product.find_by_name(name)
+    elif category:
+        app.logger.info("Filtering by category: %s", category)
+        # Convert the string category from the URL to a Category Enum
+        category_value = getattr(Category, category.upper())
+        products = Product.find_by_category(category_value)
+    elif available:
+        app.logger.info("Filtering by availability: %s", available)
+        # Convert string 'true'/'false' to boolean
+        available_value = available.lower() in ["true", "yes", "1"]
+        products = Product.find_by_availability(available_value)
+    else:
+        app.logger.info("Fetching all products")
+        products = Product.all()
+    # Serialize each product into a dictionary for the JSON response
+    results = [product.serialize() for product in products]
+    return jsonify(results), status.HTTP_200_OK
 
 ######################################################################
 # R E A D   A   P R O D U C T
 ######################################################################
 
-#
-# PLACE YOUR CODE HERE TO READ A PRODUCT
-#
-######################################################################
-# RETRIEVE A PRODUCT
-######################################################################
+
 @app.route("/products/<int:product_id>", methods=["GET"])
 def get_products(product_id):
     """
